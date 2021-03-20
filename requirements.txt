@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+mongoengine
+graphene>=2.0
+graphene-mongo
+audio_metadata
+apscheduler
+event_channel
+loguru
+python-multipart

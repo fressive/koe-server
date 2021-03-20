@@ -1,0 +1,12 @@
+import job
+
+@job.receiver("CHANNEL_NAME")
+def foo(value):
+    # This is the entrypoint of the job.
+    pass
+
+# See APSchudler for more information.
+@job.scheduler.scheduled_job('interval', seconds=5)
+def bar():
+    # This function will be called intervally.
+    pass
