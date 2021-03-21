@@ -7,6 +7,7 @@ from model.media import Lyric
 import hashlib
 import requests
 from NetEaseMusicApi import api
+from QQMusicAPI import QQMusic
 from loguru import logger
 
 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36 Edg/89.0.774.54"
@@ -23,25 +24,46 @@ class NeteaseLP(LyricProvider):
         if not song:
             return None
 
-        song_id = song[0]["id"]
-        data = requests.get("http://music.163.com/api/song/lyric?os=osx&id={}&lv=-1&kv=-1&tv=-1".format(song_id), headers={"User-Agent": user_agent}).json()
+        for i in song:
+            if not i["name"] == title:
+                continue
+            
+            song_id = i["id"]
+            data = requests.get("http://music.163.com/api/song/lyric?os=osx&id={}&lv=-1&kv=-1&tv=-1".format(song_id), headers={"User-Agent": user_agent}).json()
 
-        if not "lrc" in data.keys():
-            return None
-        
-        lyric = data["lrc"]["lyric"]
-        translated_lyric = data["tlyric"]["lyric"]
+            if not "lrc" in data.keys():
+                continue
+            
+            lyric = data["lrc"]["lyric"]
+            translated_lyric = data["tlyric"]["lyric"]
 
-        return {
-            "source": lyric,
-            "zh_CN": translated_lyric
-        }
+            return {
+                "source": lyric,
+                "zh_CN": translated_lyric
+            }
+
+        return None
 
 class QQMusicLP(LyricProvider):
     @staticmethod
     def fetch(artist, album, title):
-        pass
+        song = QQMusic.search("{} {} {}".format(artist, album, title))
+        if song.total_num == 0:
+            return None
+        
+        for i in song.data:
+            if i.name != title:
+                continue
 
+            lyric = i.lyric
+            lyric.extract()
+            return {
+                "source": lyric.lyric,
+                "zh_CN": lyric.trans
+            }
+
+        return None
+            
 providers = {
     "netease": NeteaseLP,
     "qqmusic": QQMusicLP
@@ -57,7 +79,7 @@ def fetch_lyric(model):
         
         for i in result:
             lyric = result[i]
-            if lyric == "":
+            if not lyric or lyric == "":
                 continue
             
             lyric_model = Lyric(
@@ -70,8 +92,7 @@ def fetch_lyric(model):
             )
 
             lyric_model.save()
-
-        logger.info("Successfully fetch lyric for song `{0} - {1}` from {2}.", "/".join(map(lambda x: x.name, model.artists)), model.title, k)
+            logger.info("Successfully fetch {3} lyric for song `{0} - {1}` from {2}.", "/".join(map(lambda x: x.name, model.artists)), model.title, k, i)
         
 @job.receiver("song_added")
 def recevier(data): 
