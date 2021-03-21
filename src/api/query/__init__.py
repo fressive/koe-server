@@ -11,14 +11,14 @@ import _global
 class Query(graphene.ObjectType):
     artists = graphene.List(
         artist.Artist, 
-        keywords=graphene.Argument(graphene.List(graphene.String), default_value=None),
+        keywords=graphene.Argument(graphene.List(graphene.String), default_value=""),
         regex=graphene.Argument(graphene.String, default_value=".*{}.*"),
         page=graphene.Argument(graphene.Int, default_value=0), 
         limit=graphene.Argument(graphene.Int, default_value=100)
     )
     albums = graphene.List(
         album.Album, 
-        keywords=graphene.Argument(graphene.List(graphene.String), default_value=None),
+        keywords=graphene.Argument(graphene.List(graphene.String), default_value=""),
         regex=graphene.Argument(graphene.String, default_value=".*{}.*"),
         page=graphene.Argument(graphene.Int, default_value=0), 
         limit=graphene.Argument(graphene.Int, default_value=100)
