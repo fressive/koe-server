@@ -13,14 +13,14 @@ class Query(graphene.ObjectType):
     artists = graphene.List(
         artist.Artist, 
         keywords=graphene.Argument(graphene.List(graphene.String), default_value=""),
-        regex=graphene.Argument(graphene.String, default_value=".*{}.*"),
+        regexp=graphene.Argument(graphene.String, default_value=".*{}.*"),
         page=graphene.Argument(graphene.Int, default_value=0), 
         limit=graphene.Argument(graphene.Int, default_value=100)
     )
     albums = graphene.List(
         album.Album, 
         keywords=graphene.Argument(graphene.List(graphene.String), default_value=""),
-        regex=graphene.Argument(graphene.String, default_value=".*{}.*"),
+        regexp=graphene.Argument(graphene.String, default_value=".*{}.*"),
         page=graphene.Argument(graphene.Int, default_value=0), 
         limit=graphene.Argument(graphene.Int, default_value=100)
     )
@@ -32,21 +32,21 @@ class Query(graphene.ObjectType):
     version = graphene.String(default_value=_global.version)
 
     @staticmethod
-    def resolve_artists(root, info, keywords, regex, page, limit):
+    def resolve_artists(root, info, keywords, regexp, page, limit):
         _filter = Q()
         if keywords:
             for i in keywords:
-                regex = re.compile(regex.format(i))
+                regex = re.compile(regexp.format(i))
                 _filter = _filter | (Q(name=regex) | Q(aliases__in=[regex]))
 
         return list(ArtistM.objects.filter(_filter).skip(page * limit).limit(limit))
 
     @staticmethod
-    def resolve_albums(root, info, keywords, regex, page, limit):
+    def resolve_albums(root, info, keywords, regexp, page, limit):
         _filter = Q()
         if keywords:
             for i in keywords:
-                regex = re.compile(regex.format(i))
+                regex = re.compile(regexp.format(i))
                 _filter = _filter | Q(name=regex)
 
         return list(AlbumM.objects.filter(_filter).skip(page * limit).limit(limit))
