@@ -34,11 +34,10 @@ class Song(Document):
     audio_files = ListField(ReferenceField(File))
     cover_files = ListField(ReferenceField(File))
 
-class LyricType(Enum):
-    lrc = "lrc"
-
 class Lyric(Document):
+    md5 = StringField(required=True, unique=True)
     lyric = StringField(required=True)
+    source = StringField(required=True)
     type = StringField(required=True)
     song = ReferenceField(Song, required=True)
-    languages = ListField(StringField())
+    language = StringField(required=True)

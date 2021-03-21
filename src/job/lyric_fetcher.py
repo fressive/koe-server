@@ -4,6 +4,7 @@
 import job
 from model.media import Lyric
 
+import hashlib
 import requests
 from NetEaseMusicApi import api
 from loguru import logger
@@ -42,7 +43,8 @@ class QQMusicLP(LyricProvider):
         pass
 
 providers = {
-    "netease": NeteaseLP()
+    "netease": NeteaseLP,
+    "qqmusic": QQMusicLP
 }
     
 def fetch_lyric(model):
@@ -59,6 +61,7 @@ def fetch_lyric(model):
                 continue
             
             lyric_model = Lyric(
+                md5=hashlib.md5(lyric.encode()).hexdigest(),
                 lyric=lyric,
                 source=k,
                 type="lrc",
@@ -70,7 +73,6 @@ def fetch_lyric(model):
 
         logger.info("Successfully fetch lyric for song `{0} - {1}` from {2}.", "/".join(map(lambda x: x.name, model.artists)), model.title, k)
         
-
 @job.receiver("song_added")
 def recevier(data): 
     model = data["model"]
