@@ -12,6 +12,10 @@ class FileProvider:
         pass
 
     @staticmethod
+    def open(md5):
+        pass
+
+    @staticmethod
     def get_instance(provider):
         if provider == "local_storage":
             return LocalStorage()
@@ -36,6 +40,11 @@ class LocalStorage(FileProvider):
         with open(os.path.join(save_path, md5), 'rb') as file:
             return file.read()
 
+    @staticmethod
+    def open(md5):
+        save_path = Config.get("data_save_path")
+        return open(os.path.join(save_path, md5), 'rb')
+
 class GridFSStorage(FileProvider):
     @staticmethod
     def save(md5, data):
@@ -43,4 +52,8 @@ class GridFSStorage(FileProvider):
 
     @staticmethod
     def get(md5):
+        pass
+
+    @staticmethod
+    def open(md5):
         pass

@@ -15,8 +15,10 @@ async def get_file(md5: str):
         model = FileM.objects.get(md5=md5)
 
         provider = Config.get("file_provider")
+        data = FileProvider.get_instance(provider).read(md5)
+        data_stream = FileProvider.get_instance(provider).open(md5)
 
-        return response.response_file(FileProvider.get_instance(provider).read(md5))
+        return response.response_file(data_stream, extension=model.extension, content_length=len(data))
     except:
         return response.response_not_found(message="File not found")
 
@@ -26,8 +28,23 @@ async def get_file(id: str):
         model = FileM.objects.get(id=id)
 
         provider = Config.get("file_provider")
+        data = FileProvider.get_instance(provider).read(model.md5)
+        data_stream = FileProvider.get_instance(provider).open(model.md5)
 
-        return response.response_file(FileProvider.get_instance(provider).read(model.md5))
+        return response.response_file(data_stream, extension=model.extension, content_length=len(data))
     except:
+        raise
         return response.response_not_found(message="File not found")
 
+@router.head("/file/id/{id}")
+async def head_file(id: str):
+    try:
+        model = FileM.objects.get(id=id)
+
+        provider = Config.get("file_provider")
+        data = FileProvider.get_instance(provider).read(model.md5)
+
+        return response.response_file_headers(extension=model.extension, content_length=len(data))
+    except:
+        raise
+        return response.response_not_found(message="File not found")
