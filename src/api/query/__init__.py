@@ -25,7 +25,7 @@ class Query(graphene.ObjectType):
         limit=graphene.Argument(graphene.Int, default_value=100)
     )
     songs = graphene.List(song.Song, page=graphene.Argument(graphene.Int, default_value=0), limit=graphene.Argument(graphene.Int, default_value=100))
-    files = graphene.List(file.File, page=graphene.Argument(graphene.Int, default_value=0), limit=graphene.Argument(graphene.Int, default_value=100))
+    files = graphene.List(file.File, fileId=graphene.Argument(graphene.String, required=True))
     lyrics = graphene.List(lyric.Lyric, songId=graphene.Argument(graphene.String, required=True), page=graphene.Argument(graphene.Int, default_value=0), limit=graphene.Argument(graphene.Int, default_value=100))
     playlists = graphene.List(playlist.Playlist, playlistId=graphene.Argument(graphene.String, default_value=""), page=graphene.Argument(graphene.Int, default_value=0), limit=graphene.Argument(graphene.Int, default_value=100))
     
@@ -56,8 +56,8 @@ class Query(graphene.ObjectType):
         return list(SongM.objects.skip(page * limit).limit(limit))
         
     @staticmethod
-    def resolve_files(root, info, page, limit):
-        return list(FileM.objects.skip(page * limit).limit(limit))
+    def resolve_files(root, info, fileId):
+        return list(FileM.objects.filter(id=fileId))
 
     @staticmethod
     def resolve_lyrics(root, info, songId, page, limit):
